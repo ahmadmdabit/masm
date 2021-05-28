@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Str;
+
 /** @var \Laravel\Lumen\Routing\Router $router */
 
 /*
@@ -16,3 +18,13 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+$router->get('/key', function () use ($router) {
+    return base64_encode(md5(rand()));
+});
+
+$router->get('/uuid', function () use ($router) {
+    return (string) Str::uuid();
+});
+
+$router->post('/subscription/register', ['as'=>'subscriptionRegister', 'uses'=>'SubscriptionController@register']);
