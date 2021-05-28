@@ -24,7 +24,7 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Register new subscription.
+     * Register.
      *
      * @param  Request $request
      * @return Response
@@ -93,6 +93,14 @@ class SubscriptionController extends Controller
             return [ 'data' => null, 'status' => false, 'error' => 'Token error!' ];
         }
 
+        $data_purchase = json_decode(json_encode(DB::select(
+            'SELECT * FROM `purchases` WHERE `status` = 1 AND `app_id` =
+             (SELECT `app_id` FROM `tokens` WHERE `token` = ? LIMIT 1) LIMIT 1;', [$request->input('token')])), true);
+
+        if (count($data_purchase)) {
+            return [ 'data' => null, 'status' => false, 'error' => 'Sorry, but you have active subscription!' ];
+        }
+
         $response = CurlHelper::post(
             env('MOCK_URL').($os == 0 ? '/mock/google-verification' : '/mock/ios-verification'),
             $request->all());
@@ -117,7 +125,31 @@ class SubscriptionController extends Controller
                 return [ 'data' => null, 'status' => false, 'error' => $th->getMessage() ];
             }
 
-            return [ 'data' => [ 'expire-date' => $response['data']['expire-date']], 'status' => boolval($status), 'error' => null ];
+            return [ 'data' => [ 'expire-date' => $response['data']['expire-date']], 'status' => boolval($status), 'error' => $status ? null : 'Verification Error!' ];
+        }
+    }
+
+    /**
+     * Check the subscription.
+     *
+     * @param  Request $request
+     * @return Response
+     */
+    public function check(Request $request)
+    {
+        $this->validate($request, [
+            'token' => 'required|uuid',
+        ]);
+
+        $data = json_decode(json_encode(DB::select(
+            'SELECT * FROM `purchases` WHERE `status` = 1 AND `app_id` =
+             (SELECT `app_id` FROM `tokens` WHERE `token` = ? LIMIT 1) LIMIT 1;', [$request->input('token')])), true);
+
+        if (count($data)) {
+            return [ 'data' => $data, 'status' => true, 'error' => null ];
+        }
+        else {
+            return [ 'data' => null, 'status' => false, 'error' => 'Token error!' ];
         }
     }
 }

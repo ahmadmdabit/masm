@@ -29,3 +29,4 @@ $router->get('/uuid', function () use ($router) {
 
 $router->post('/subscription/register', ['as'=>'subscriptionRegister', 'uses'=>'SubscriptionController@register']);
 $router->post('/subscription/purchase', ['as'=>'subscriptionPurchase', 'uses'=>'SubscriptionController@purchase']);
+$router->post('/subscription/check', ['as'=>'subscriptionCheck', 'uses'=>'SubscriptionController@check']);
