@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Str;
-
 /** @var \Laravel\Lumen\Routing\Router $router */
 
 /*
@@ -19,13 +17,5 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->get('/key', function () use ($router) {
-    return base64_encode(md5(rand()));
-});
-
-$router->get('/uuid', function () use ($router) {
-    return (string) Str::uuid();
-});
-
-$router->post('/subscription/register', ['as'=>'subscriptionRegister', 'uses'=>'SubscriptionController@register']);
-$router->post('/subscription/purchase', ['as'=>'subscriptionPurchase', 'uses'=>'SubscriptionController@purchase']);
+$router->post('/mock/google-verification', ['middleware' => 'auth', 'as'=>'googleVerification', 'uses'=>'MockController@googleVerification']);
+$router->post('/mock/ios-verification', ['middleware' => 'auth', 'as'=>'iosVerification', 'uses'=>'MockController@iosVerification']);
