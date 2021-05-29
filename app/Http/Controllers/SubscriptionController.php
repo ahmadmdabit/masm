@@ -166,4 +166,48 @@ class SubscriptionController extends Controller
             return [ 'data' => null, 'status' => false, 'error' => 'Token error!' ];
         }
     }
+
+    /**
+     * Report the subscriptions.
+     *
+     * @param  Request $request
+     * @return Response
+     */
+    public function report(String $baseOn)
+    {
+        if (!in_array($baseOn, ['expire_date','created_date','app_id'])) {
+            return [ 'data' => null, 'status' => false, 'error' => 'baseOn error!' ];
+        }
+        $script = '';
+        switch ($baseOn) {
+            case 'expire_date':
+                $script =
+                'SELECT DATE(`expire_date`), `state`, COUNT(`uid`)
+                FROM `purchases`
+                WHERE `status` <> 0
+                GROUP BY DATE(`expire_date`), `state`
+                ORDER BY `expire_date`;
+                ';
+                break;
+            case 'created_date':
+                $script =
+                'SELECT DATE(`created_date`), `state`, COUNT(`uid`)
+                FROM `purchases`
+                WHERE `status` <> 0
+                GROUP BY DATE(`created_date`), `state`
+                ORDER BY `created_date`;
+                ';
+                break;
+            case 'app_id':
+                $script =
+                'SELECT `state`, COUNT(`app_id`)
+                FROM `purchases`
+                WHERE `status` <> 0
+                GROUP BY `state`
+                ORDER BY `state`;
+                ';
+                break;
+        }
+        return [ 'data' => DB::select($script, []), 'status' => true, 'error' => null ];
+    }
 }
