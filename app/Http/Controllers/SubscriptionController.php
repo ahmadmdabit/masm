@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use GuzzleHttp;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use App\Events\SubscriptionStateEvent;
+use App\Models\EventModel;
 
 class SubscriptionController extends Controller
 {
@@ -123,6 +125,18 @@ class SubscriptionController extends Controller
                 );
             } catch (\Throwable $th) {
                 return [ 'data' => null, 'status' => false, 'error' => $th->getMessage() ];
+            }
+
+            $purchase = json_decode(json_encode(DB::select('SELECT `uid`, `state` FROM purchases WHERE `app_id` = ?', [$data[0]['app_id']])), true);
+
+            $device = json_decode(json_encode(DB::select('SELECT `uid` FROM devices WHERE `app_id` = ?', [$data[0]['app_id']])), true);
+
+            if ($status) {
+                $eventModel = new EventModel();
+                $eventModel->device_id = $device[0]['uid'];
+                $eventModel->app_id = $data[0]['app_id'];
+                $eventModel->info = ['purchase' => ['uid' => $purchase[0]['uid'], 'state' => $purchase[0]['state']]];
+                event(new SubscriptionStateEvent($eventModel));
             }
 
             return [ 'data' => [ 'expire-date' => $response['data']['expire-date']], 'status' => boolval($status), 'error' => $status ? null : 'Verification Error!' ];

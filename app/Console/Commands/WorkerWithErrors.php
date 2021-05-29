@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use DateTime;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use App\Events\SubscriptionStateEvent;
+use App\Models\EventModel;
 
 class WorkerWithErrors extends Command
 {
@@ -86,6 +88,12 @@ class WorkerWithErrors extends Command
                     $this->error($th->getMessage());
                     throw $th;
                 }
+                $device = json_decode(json_encode(DB::select('SELECT `uid` FROM devices WHERE `app_id` = ?', [$value['app_id']])), true);
+                $eventModel = new EventModel();
+                $eventModel->device_id = $device[0]['uid'];
+                $eventModel->app_id = $value['app_id'];
+                $eventModel->info = ['purchase' => ['uid' => $value['uid'], 'state' => 2]];
+                event(new SubscriptionStateEvent($eventModel));
             }
             $result = true;
         }

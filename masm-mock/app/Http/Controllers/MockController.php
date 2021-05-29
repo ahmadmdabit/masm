@@ -21,6 +21,28 @@ class MockController extends Controller
     }
 
     /**
+     * Slack Channel.
+     *
+     * @param  Request $request
+     * @return Response
+     */
+    public function slackChannel(Request $request)
+    {
+        $this->validate($request, [
+            'device_id' => 'required|uuid',
+            'app_id' => 'required|uuid',
+            'info' => 'required|string',
+        ]);
+
+        if (rand(1,100) % 2) {
+            return [ 'data' => null, 'status' => true, 'error' => null ];
+        }
+        else {
+            return [ 'data' => null, 'status' => false, 'error' => null ];
+        }
+    }
+
+    /**
      * Google Verification.
      *
      * @param  Request $request

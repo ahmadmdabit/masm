@@ -19,3 +19,4 @@ $router->get('/', function () use ($router) {
 
 $router->post('/mock/google-verification', ['middleware' => 'auth', 'as'=>'googleVerification', 'uses'=>'MockController@googleVerification']);
 $router->post('/mock/ios-verification', ['middleware' => 'auth', 'as'=>'iosVerification', 'uses'=>'MockController@iosVerification']);
+$router->post('/mock/slack-channel', ['middleware' => 'auth', 'as'=>'slackChannel', 'uses'=>'MockController@slackChannel']);
